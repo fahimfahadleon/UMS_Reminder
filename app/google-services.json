@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "607144484217",
+    "firebase_url": "https://torque-b5f74-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "torque-b5f74",
+    "storage_bucket": "torque-b5f74.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:607144484217:android:ca591e9f8a47829864e3a8",
+        "android_client_info": {
+          "package_name": "com.unicornitsolutions.umsreminder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiBGK1ickhCgYDQfTCUukCcAM-8mtrTLk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
