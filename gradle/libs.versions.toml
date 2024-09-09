@@ -13,6 +13,7 @@ googleFirebaseCrashlytics = "3.0.2"
 firebaseDatabase = "21.0.0"
 permissionx = "1.8.0"
 gson = "2.11.0"
+location = "21.3.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -26,6 +27,7 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 permissionx = { group = "com.guolindev.permissionx", name = "permissionx", version.ref = "permissionx" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "location" }
 
 
 

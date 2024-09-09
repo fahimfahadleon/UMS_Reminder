@@ -1,5 +1,7 @@
 package com.unicornitsolutions.umsreminder.viewmodels;
 
+
+
 import android.view.View;
 
 import androidx.lifecycle.MutableLiveData;
@@ -29,6 +31,8 @@ public class AddNewCustomerViewModel extends ViewModel {
             getAction.setValue(Constants.ACTION_SET_LOCATION);
         }else if(id == R.id.fabIcon){
             getAction.setValue(Constants.ACTION_ADD_NEW_MACHINE);
+        }else if(id == R.id.openMap){
+            getAction.setValue(Constants.ACTION_OPEN_MAP);
         }
     }
 }

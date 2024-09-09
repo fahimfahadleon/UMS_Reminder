@@ -1,11 +1,16 @@
 package com.unicornitsolutions.umsreminder.ui;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -14,6 +19,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
+
+
 import com.unicornitsolutions.umsreminder.R;
 import com.unicornitsolutions.umsreminder.adapter.MachineModelAdapter;
 import com.unicornitsolutions.umsreminder.callbacks.SetAlarmCallback;
@@ -23,10 +30,10 @@ import com.unicornitsolutions.umsreminder.models.CustomerModel;
 import com.unicornitsolutions.umsreminder.models.MachineModel;
 import com.unicornitsolutions.umsreminder.utils.AlertDialogViewer;
 import com.unicornitsolutions.umsreminder.utils.Constants;
+import com.unicornitsolutions.umsreminder.utils.SingleShotLocationProvider;
 import com.unicornitsolutions.umsreminder.viewmodels.AddNewCustomerViewModel;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +44,8 @@ public class AddNewCustomerActivity extends AppCompatActivity {
     ArrayList<MachineModel> machineModels;
     FirebaseDatabase database;
     DatabaseReference reference;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +58,59 @@ public class AddNewCustomerActivity extends AppCompatActivity {
         machineModels = new ArrayList<>();
         database = FirebaseDatabase.getInstance();
         reference = database.getReference();
+
+
         initModel();
     }
+
+    private void getCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // If permission is not granted, request it again
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 5000);
+            return;
+        }
+
+
+        SingleShotLocationProvider.requestSingleUpdate(this,
+                new SingleShotLocationProvider.LocationCallback() {
+                    @Override public void onNewLocationAvailable(SingleShotLocationProvider.GPSCoordinates location) {
+                        binding.location.setText(location.latitude+","+location.longitude);
+                    }
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 5000) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, get the current location
+                getCurrentLocation();
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    private void openGoogleMaps(double latitude, double longitude) {
+        String geoUri = "geo:" + latitude + "," + longitude + "?q=" + latitude + "," + longitude;
+        Uri gmmIntentUri = Uri.parse(geoUri);
+
+        // Create an intent to open Google Maps
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+
+        // Check if there's an app that can handle the intent
+        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(mapIntent);
+        } else {
+            Toast.makeText(this, "Google Maps is not installed.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void initModel() {
         MachineModelAdapter adapter = new MachineModelAdapter(this,machineModels);
@@ -61,12 +121,26 @@ public class AddNewCustomerActivity extends AppCompatActivity {
                     makeRequest();
                     break;
                 }
+                case Constants.ACTION_OPEN_MAP:{
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        // Request location permission
+                        ActivityCompat.requestPermissions(this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 5000);
+                    } else {
+                        // Get the current location if permission is already granted
+                        getCurrentLocation();
+                    }
+                    break;
+                }
                 case Constants.ACTION_SET_LOCATION:{
-//                    if(checkLocationPermission()){
-//
-//                    }else {
-//                        requestPermissionAndWatchLocation();
-//                    }
+                        if(binding.location.getText().toString().isEmpty()){
+                            return;
+                        }else {
+                            String latlong = binding.location.getText().toString();
+                            String[]loc = latlong.split(",");
+                            openGoogleMaps(Double.parseDouble(loc[0].trim()),Double.parseDouble(loc[1].trim()));
+                        }
                     break;
                 }
                 case Constants.ACTION_ADD_NEW_MACHINE:{
